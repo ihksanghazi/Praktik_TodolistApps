@@ -1,198 +1,220 @@
-# 🟦 Modul 3 Struktur Folder & Koneksi Database
+# 🟦 Modul 4 Layout, Bootstrap & Reusable Component
 
 **🎯 Tujuan Modul**
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Memahami **struktur project PHP yang rapi**
-- Menjelaskan fungsi setiap folder
-- Membuat **koneksi database MySQL ke PHP**
-- Menguji koneksi database dengan benar
+- Menggunakan **Bootstrap** untuk membuat UI web
+- Membuat **layout konsisten** di seluruh halaman
+- Menerapkan **reusable component** (header, footer, navbar)
+- Mengatur **navbar active** sesuai halaman aktif
+- Menambahkan **CSS custom**
 
-## 🧠 Konsep Struktur Folder (MVC Sederhana)
+## 🧠 Bootstrap Dasar
 
-**Kenapa Struktur Folder Penting?**
-Struktur folder yang baik akan:
+**Apa itu Bootstrap?**
+Bootstrap adalah **framework CSS** yang membantu kita:
 
-- Membuat kode **mudah dibaca**
-- Memudahkan **maintenance**
-- Memisahkan **tugas setiap file**
+- Membuat tampilan cepat & rapi
+- Menghindari styling dari nol
+- Membuat layout responsif
 
-📌 Walaupun belum full MVC, kita menerapkan **konsep pemisahan tanggung jawab**.
+**Komponen Bootstrap yang akan digunakan**
 
-## 🧠 Struktur Folder Aplikasi TodoList
+- Container
+- Card
+- Button
+- Navbar
+- Form
+- Alert
 
-Struktur folder yang akan digunakan:
+📌 Bootstrap akan dipanggil melalui **CDN**.
 
-```txt
-TodoListApp/
-│
-├── assets/
-│   └── css/
-│       └── style.css
-│
-├── auth/
-│   ├── login.php
-│   ├── login_process.php
-│   ├── register.php
-│   ├── register_process.php
-│   ├── logout.php
-│   └── auth_check.php
-│
-├── config/
-│   └── koneksi.php
-│
-├── layouts/
-│   ├── header.php
-│   ├── footer.php
-│   └── navbar.php
-│
-├── dashboard/
-│   └── index.php
-│
-├── todolist/
-│   ├── index.php
-│   ├── store.php
-│   ├── done.php
-│   └── delete.php
-│
-└── index.php
-```
+## 🧠 Konsep Layout & Reusable Component
 
-## 🧠 Fungsi Setiap Folder
+**Masalah Jika Tanpa Reusable File**
 
-📁 `config`
+- Header ditulis berulang
+- Navbar beda-beda
+- Sulit maintenance
 
-- Menyimpan konfigurasi aplikasi
-- Contoh: koneksi database
+**Solusi**
+Gunakan:
 
-📁 `auth`
+- header.php
+- navbar.php
+- footer.php
 
-- Semua file autentikasi
-- Login, register, logout, proteksi halaman
+📌 Prinsip:
+**Satu komponen → digunakan di banyak halaman**
 
-📁 `layouts`
-
-- Komponen tampilan yang dipakai ulang
-- Header, navbar, footer
-
-📁 `dashboard`
-
-- Halaman utama setelah login
-
-📁 `todolist`
-
-- Semua fitur CRUD todo
-
-📌 Dengan struktur ini:
-**1 file = 1 tanggung jawab**
-
-## Konsep Reusable File
-
-**Apa itu Reusable File?**
-Reusable file adalah file yang:
-
-- Ditulis **sekali**
-- Digunakan **berkali-kali**
-
-**Contoh:**
-
-- `koneksi.php` → dipakai di banyak file
-- `header.php` → dipakai di semua halaman
-
-**Keuntungan:**
-
-- Kode lebih singkat
-- Mudah diubah
-- Minim error
-
-## 🧠 File koneksi.php
+## 🧠 File header.php
 
 **Fungsi**
-Menghubungkan aplikasi PHP dengan database MySQL.
-**Isi File** `config/koneksi.php`
+
+- Menyimpan:
+  - HTML awal
+  - Bootstrap CSS
+  - CSS custom
+
+**Buat file** `layouts/header.php`
+
+```php
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo App</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+```
+
+## 🧠 File footer.php
+
+**Fungsi**
+
+- Menutup HTML
+- Memuat Bootstrap JS
+
+**Buat file** `layouts/footer.php`
+
+```php
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+```
+
+## 🧠 File navbar.php
+
+**Fungsi**
+
+- Navigasi utama aplikasi
+- Digunakan di dashboard & todolist
+
+**Konsep Navbar Active**
+Navbar akan aktif berdasarkan:
+
+```php
+$activePage
+```
+
+**Buat file** `layouts/navbar.php`
 
 ```php
 <?php
-$conn = mysqli_connect("localhost", "root", "", "todolist");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-if (!$conn) {
-    die("Koneksi database gagal");
+$activePage = $activePage ?? '';
+?>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="../dashboard/index.php">Todo App</a>
+
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+                <a class="nav-link <?= ($activePage === 'dashboard') ? 'active' : ''; ?>"
+                   href="../dashboard/index.php">
+                   Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= ($activePage === 'todolist') ? 'active' : ''; ?>"
+                   href="../todolist/index.php">
+                   Todo List
+                </a>
+            </li>
+        </ul>
+
+        <span class="navbar-text text-white me-3">
+            Halo, <?= $_SESSION['name'] ?? ''; ?>
+        </span>
+
+        <a href="../auth/logout.php" class="btn btn-danger btn-sm">
+            Logout
+        </a>
+    </div>
+</nav>
+```
+
+## 🧠 Konsep include
+
+**Apa itu** `include`?
+`include` digunakan untuk:
+
+- Memanggil file lain
+- Menghindari duplikasi kode
+
+**Contoh Penggunaan**
+
+```php
+include '../layouts/header.php';
+include '../layouts/navbar.php';
+include '../layouts/footer.php';
+```
+
+📌 Jika file tidak ditemukan:
+
+- `include` → warning
+- `require` → fatal error
+
+## 🛠️ Membuat CSS Custom
+
+**Buat file** `assets/css/style.css`
+
+```css
+body {
+  background-color: #f4f6f9;
+}
+
+.card {
+  border-radius: 14px;
+}
+
+.todo-done {
+  text-decoration: line-through;
+  color: gray;
 }
 ```
 
-**Penjelasan**
+## 🛠️ Menggunakan Layout di Halaman
 
-- `localhost` → server database
-- `root` → username database
-- `""` → password (default lokal)
-- `todolist` → nama database
-
-## 🛠️ Membuat Struktur Folder
-
-**Langkah**
-
-1. Masuk ke folder:
-
-   ```bash
-   htdocs/TodoListApp
-   atau
-   laragon/www/TodoListApp
-   ```
-
-2. Buat folder:
-
-   ```txt
-   assets
-   auth
-   config
-   layouts
-   dashboard
-   todolist
-   ```
-
-3. Buat file kosong:
-   - `index.php`
-   - `config/koneksi.php`
-
-## 🛠️ Membuat File Koneksi Database
-
-**Langkah**
-
-1. Buka `config/koneksi.php`
-2. Tulis kode koneksi (di atas)
-3. Simpan file
-
-## 🛠️ Uji Koneksi Database
-
-**Cara 1 — Uji Langsung**
-Tambahkan sementara di `koneksi.php`:
-
-```php
-echo "Koneksi berhasil";
-```
-
-Akses:
-
-```bash
-http://localhost/TodoListApp/config/koneksi.php
-```
-
-Jika muncul teks → **koneksi sukses**
-
-⚠️ Setelah tes, **hapus echo** tersebut.
-
-**Cara 2 — Uji dari File Lain**
-
-Buat file `test.php` di root:
+**Contoh di** `dashboard/index.php`
 
 ```php
 <?php
-include 'config/koneksi.php';
-echo "Database terkoneksi";
+$activePage = 'dashboard';
+
+include '../layouts/header.php';
+include '../layouts/navbar.php';
+?>
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h4>Dashboard</h4>
+        <p>Selamat datang!</p>
+    </div>
+</div>
+
+<?php include '../layouts/footer.php'; ?>
 ```
 
-Akses:
+## 🛠️ Mengatur Navbar Active
 
-```bash
-http://localhost/TodoListApp/test.php
-```
+**Langkah**
+
+1. Tentukan halaman aktif:
+   ```php
+   $activePage = 'todolist';
+   ```
+2. Navbar otomatis aktif sesuai halaman
+
+📌 Tidak perlu JavaScript
