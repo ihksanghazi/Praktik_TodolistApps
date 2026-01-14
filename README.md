@@ -1,162 +1,198 @@
-# 🟦 Modul 2 — Database & Relasi One-to-Many
+# 🟦 Modul 3 Struktur Folder & Koneksi Database
 
 **🎯 Tujuan Modul**
-
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Memahami **konsep database relasional**
-- Menjelaskan fungsi tabel `users` dan `todolists`
-- Menerapkan **relasi One-to-Many**
-- Menggunakan **Foreign Key** dengan benar
-- Menyiapkan database untuk aplikasi TodoList
+- Memahami **struktur project PHP yang rapi**
+- Menjelaskan fungsi setiap folder
+- Membuat **koneksi database MySQL ke PHP**
+- Menguji koneksi database dengan benar
 
-## 🧠 Konsep Database
+## 🧠 Konsep Struktur Folder (MVC Sederhana)
 
-**Apa itu Database?**
-Database adalah tempat untuk **menyimpan data secara terstruktur**, sehingga:
+**Kenapa Struktur Folder Penting?**
+Struktur folder yang baik akan:
 
-- Data mudah dicari
-- Data aman
-- Data bisa diolah oleh aplikasi
+- Membuat kode **mudah dibaca**
+- Memudahkan **maintenance**
+- Memisahkan **tugas setiap file**
 
-📌 Dalam aplikasi TodoList, database digunakan untuk menyimpan:
+📌 Walaupun belum full MVC, kita menerapkan **konsep pemisahan tanggung jawab**.
 
-- Data user (akun)
-- Data todo (daftar tugas)
+## 🧠 Struktur Folder Aplikasi TodoList
 
-## 🧠 Tabel users
-
-**Fungsi Tabel** `users`
-Tabel `users` menyimpan data akun pengguna.
-
-**Kolom pada tabel** `users`
-| Kolom | Fungsi |
-| ---------- | ---------------------------- |
-| id | Primary Key (identitas user) |
-| name | Nama lengkap user |
-| username | Username untuk login |
-| password | Password (terenkripsi) |
-| created_at | Waktu pendaftaran |
-
-**📌 Catatan penting**
-`id` bersifat **unik** dan akan digunakan oleh tabel lain.
-
-## 🧠 Tabel todolists
-
-**Fungsi Tabel** `todolists`
-Menyimpan daftar todo milik user.
-
-**Kolom pada tabel** `todolists`
-| Kolom | Fungsi |
-| ---------- | ---------------------- |
-| id | Primary Key todo |
-| user_id | Relasi ke tabel users |
-| title | Isi todo |
-| is_done | Status selesai / belum |
-| created_at | Waktu pembuatan |
-
-## 🧠 Relasi One-to-Many
-
-**Konsep Relasi**
-**One-to-Many** berarti:
-Satu data di tabel A bisa memiliki banyak data di tabel B
-
-**Pada Aplikasi TodoList**
+Struktur folder yang akan digunakan:
 
 ```txt
-1 user → banyak todo
+TodoListApp/
+│
+├── assets/
+│   └── css/
+│       └── style.css
+│
+├── auth/
+│   ├── login.php
+│   ├── login_process.php
+│   ├── register.php
+│   ├── register_process.php
+│   ├── logout.php
+│   └── auth_check.php
+│
+├── config/
+│   └── koneksi.php
+│
+├── layouts/
+│   ├── header.php
+│   ├── footer.php
+│   └── navbar.php
+│
+├── dashboard/
+│   └── index.php
+│
+├── todolist/
+│   ├── index.php
+│   ├── store.php
+│   ├── done.php
+│   └── delete.php
+│
+└── index.php
 ```
 
-Artinya:
+## 🧠 Fungsi Setiap Folder
 
-- 1 user bisa punya 10 todo
-- 1 todo **hanya milik 1 user**
+📁 `config`
 
-## 🧠 Foreign Key & ON DELETE CASCADE
+- Menyimpan konfigurasi aplikasi
+- Contoh: koneksi database
 
-**Apa itu Foreign Key?**
-Foreign Key adalah **kolom penghubung** antar tabel.
-Pada kasus ini:
+📁 `auth`
 
-- `todolists.user_id` → `users.id`
+- Semua file autentikasi
+- Login, register, logout, proteksi halaman
 
-**Fungsi** `ON DELETE CASCADE`
+📁 `layouts`
 
-Jika:
+- Komponen tampilan yang dipakai ulang
+- Header, navbar, footer
 
-- User dihapus
-  Maka:
-- Semua todo milik user tersebut **ikut terhapus otomatis**
+📁 `dashboard`
 
-📌 Ini mencegah **orphan data**
+- Halaman utama setelah login
 
-## 🛠️ Membuat Database todolist
+📁 `todolist`
+
+- Semua fitur CRUD todo
+
+📌 Dengan struktur ini:
+**1 file = 1 tanggung jawab**
+
+## Konsep Reusable File
+
+**Apa itu Reusable File?**
+Reusable file adalah file yang:
+
+- Ditulis **sekali**
+- Digunakan **berkali-kali**
+
+**Contoh:**
+
+- `koneksi.php` → dipakai di banyak file
+- `header.php` → dipakai di semua halaman
+
+**Keuntungan:**
+
+- Kode lebih singkat
+- Mudah diubah
+- Minim error
+
+## 🧠 File koneksi.php
+
+**Fungsi**
+Menghubungkan aplikasi PHP dengan database MySQL.
+**Isi File** `config/koneksi.php`
+
+```php
+<?php
+$conn = mysqli_connect("localhost", "root", "", "todolist");
+
+if (!$conn) {
+    die("Koneksi database gagal");
+}
+```
+
+**Penjelasan**
+
+- `localhost` → server database
+- `root` → username database
+- `""` → password (default lokal)
+- `todolist` → nama database
+
+## 🛠️ Membuat Struktur Folder
 
 **Langkah**
 
-1. Buka **phpMyAdmin**
-2. Klik menu **SQL**
-3. Jalankan perintah:
-   ```sql
-   CREATE DATABASE IF NOT EXISTS todolist;
-   USE todolist;
+1. Masuk ke folder:
+
+   ```bash
+   htdocs/TodoListApp
+   atau
+   laragon/www/TodoListApp
    ```
 
-✅ Jika berhasil, database `todolist` akan muncul di sidebar kiri.
+2. Buat folder:
 
-## 🛠️ Membuat Tabel users
+   ```txt
+   assets
+   auth
+   config
+   layouts
+   dashboard
+   todolist
+   ```
 
-Jalankan SQL berikut:
+3. Buat file kosong:
+   - `index.php`
+   - `config/koneksi.php`
 
-```sql
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+## 🛠️ Membuat File Koneksi Database
+
+**Langkah**
+
+1. Buka `config/koneksi.php`
+2. Tulis kode koneksi (di atas)
+3. Simpan file
+
+## 🛠️ Uji Koneksi Database
+
+**Cara 1 — Uji Langsung**
+Tambahkan sementara di `koneksi.php`:
+
+```php
+echo "Koneksi berhasil";
 ```
 
-**Penjelasan Singkat**
+Akses:
 
-- `AUTO_INCREMENT` → id otomatis bertambah
-- `UNIQUE` → username tidak boleh sama
-- `VARCHAR(255)` → aman untuk hash password
-
-## 🛠️ Membuat Tabel `todolists` + Relasi
-
-Jalankan SQL berikut:
-
-```sql
-CREATE TABLE todolists (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    title VARCHAR(150) NOT NULL,
-    is_done BOOLEAN DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_user_todo
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
+```bash
+http://localhost/TodoListApp/config/koneksi.php
 ```
 
-**Penjelasan Penting**
+Jika muncul teks → **koneksi sukses**
 
-- `user_id` → penghubung ke tabel users
-- `FOREIGN` KEY → membuat relasi
-- `ON DELETE CASCADE` → hapus otomatis data todo
+⚠️ Setelah tes, **hapus echo** tersebut.
 
-## 🛠️ Cek Relasi di phpMyAdmin
+**Cara 2 — Uji dari File Lain**
 
-Langkah
+Buat file `test.php` di root:
 
-1. Klik tabel `todolists`
-2. Masuk tab **Structure**
-3. Scroll ke bagian **Relation View**
-4. Pastikan:
-   - `user_id` terhubung ke `users.id`
+```php
+<?php
+include 'config/koneksi.php';
+echo "Database terkoneksi";
+```
 
-Jika terlihat relasi → **berhasil**
+Akses:
+
+```bash
+http://localhost/TodoListApp/test.php
+```
