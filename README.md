@@ -1,173 +1,162 @@
-# 🟦 Modul 1 — Pengenalan Project & Setup Lingkungan
+# 🟦 Modul 2 — Database & Relasi One-to-Many
 
 **🎯 Tujuan Modul**
 
-Setelah mengikuti modul ini, siswa mampu:
+Setelah menyelesaikan modul ini, siswa mampu:
 
-- Memahami **gambaran besar aplikasi TodoList berbasis web**
-- Menjelaskan **alur kerja aplikasi**
-- Menyiapkan **environment pengembangan PHP + MySQL**
-- Menjalankan aplikasi web di **localhost**
+- Memahami **konsep database relasional**
+- Menjelaskan fungsi tabel `users` dan `todolists`
+- Menerapkan **relasi One-to-Many**
+- Menggunakan **Foreign Key** dengan benar
+- Menyiapkan database untuk aplikasi TodoList
 
-## 🧠 Apa Itu Aplikasi Web Berbasis PHP?
+## 🧠 Konsep Database
 
-**Penjelasan**
-Aplikasi web berbasis PHP adalah aplikasi yang:
+**Apa itu Database?**
+Database adalah tempat untuk **menyimpan data secara terstruktur**, sehingga:
 
-- Berjalan di **server**
-- Diakses melalui **browser**
-- Menggunakan **PHP** sebagai bahasa backend
-- Menggunakan **database** untuk menyimpan data
+- Data mudah dicari
+- Data aman
+- Data bisa diolah oleh aplikasi
 
-📌 Contoh aplikasi web:
+📌 Dalam aplikasi TodoList, database digunakan untuk menyimpan:
 
-- Sistem Login
-- Aplikasi Kasir
-- Aplikasi TodoList
-- Sistem Akademik
+- Data user (akun)
+- Data todo (daftar tugas)
 
-**Kenapa PHP?**
+## 🧠 Tabel users
 
-- Mudah dipelajari
-- Banyak digunakan
-- Cocok untuk pemula
-- Bisa langsung dijalankan di localhost
+**Fungsi Tabel** `users`
+Tabel `users` menyimpan data akun pengguna.
 
-## 🧠 Studi Kasus: TodoList App
+**Kolom pada tabel** `users`
+| Kolom | Fungsi |
+| ---------- | ---------------------------- |
+| id | Primary Key (identitas user) |
+| name | Nama lengkap user |
+| username | Username untuk login |
+| password | Password (terenkripsi) |
+| created_at | Waktu pendaftaran |
 
-**Deskripsi Aplikasi**
-Aplikasi **TodoList** adalah aplikasi untuk:
+**📌 Catatan penting**
+`id` bersifat **unik** dan akan digunakan oleh tabel lain.
 
-- Mencatat daftar tugas
-- Menandai tugas yang sudah selesai
-- Menghapus tugas
-- Setiap user memiliki todo masing-masing
+## 🧠 Tabel todolists
 
-**Fitur Utama**
+**Fungsi Tabel** `todolists`
+Menyimpan daftar todo milik user.
 
-- Register
-- Login
-- Dashboard
-- Manajemen Todo
-- Logout
+**Kolom pada tabel** `todolists`
+| Kolom | Fungsi |
+| ---------- | ---------------------- |
+| id | Primary Key todo |
+| user_id | Relasi ke tabel users |
+| title | Isi todo |
+| is_done | Status selesai / belum |
+| created_at | Waktu pembuatan |
 
-## 🧠 Alur Aplikasi TodoList
+## 🧠 Relasi One-to-Many
 
-**Flow Aplikasi**
+**Konsep Relasi**
+**One-to-Many** berarti:
+Satu data di tabel A bisa memiliki banyak data di tabel B
+
+**Pada Aplikasi TodoList**
 
 ```txt
-User membuka website
-        ↓
-Halaman Login
-        ↓
-Login berhasil
-        ↓
-Dashboard
-        ↓
-Todo List
-        ↓
-Logout
+1 user → banyak todo
+```
+
+Artinya:
+
+- 1 user bisa punya 10 todo
+- 1 todo **hanya milik 1 user**
+
+## 🧠 Foreign Key & ON DELETE CASCADE
+
+**Apa itu Foreign Key?**
+Foreign Key adalah **kolom penghubung** antar tabel.
+Pada kasus ini:
+
+- `todolists.user_id` → `users.id`
+
+**Fungsi** `ON DELETE CASCADE`
+
+Jika:
+
+- User dihapus
+  Maka:
+- Semua todo milik user tersebut **ikut terhapus otomatis**
+
+📌 Ini mencegah **orphan data**
+
+## 🛠️ Membuat Database todolist
+
+**Langkah**
+
+1. Buka **phpMyAdmin**
+2. Klik menu **SQL**
+3. Jalankan perintah:
+   ```sql
+   CREATE DATABASE IF NOT EXISTS todolist;
+   USE todolist;
+   ```
+
+✅ Jika berhasil, database `todolist` akan muncul di sidebar kiri.
+
+## 🛠️ Membuat Tabel users
+
+Jalankan SQL berikut:
+
+```sql
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 **Penjelasan Singkat**
 
-- **Login** → Autentikasi user
-- **Dashboard** → Halaman utama setelah login
-- **Todo List** → CRUD data todo
-- **Logout** → Keluar dari sistem
+- `AUTO_INCREMENT` → id otomatis bertambah
+- `UNIQUE` → username tidak boleh sama
+- `VARCHAR(255)` → aman untuk hash password
 
-## 🧠 Pengenalan Teknologi yang Digunakan
+## 🛠️ Membuat Tabel `todolists` + Relasi
 
-**1️⃣ PHP Native**
+Jalankan SQL berikut:
 
-- PHP tanpa framework
-- Fokus ke logika dasar
-- Cocok untuk memahami konsep backend
+```sql
+CREATE TABLE todolists (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    is_done BOOLEAN DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-**2️⃣ MySQL**
-
-- Database untuk menyimpan:
-  - Data user
-  - Data todo
-- Diakses menggunakan PHP
-
-3️⃣ Bootstrap
-
-- Framework CSS
-- Membuat tampilan:
-  - Lebih rapi
-  - Responsif
-  - Modern
-
-## 🧠 Tools yang Digunakan
-
-**Tools Wajib**
-
-- **XAMPP / Laragon**
-  - Apache (Web Server)
-  - MySQL (Database)
-- **Browser**
-  - Chrome / Firefox
-- **Code Editor**
-  - VS Code (disarankan)
-
-📌 Catatan:
-Disarankan menggunakan **Laragon** karena ringan dan cepat.
-
-## 🛠️ Menjalankan Web Server
-
-**Langkah (Laragon)**
-
-1. Buka **Laragon**
-2. Klik **Start All**
-3. Pastikan:
-   - Apache: ✅ Running
-   - MySQL: ✅ Running
-
-**Cek di Browser**
-Buka:
-
-```txt
-http://localhost
+    CONSTRAINT fk_user_todo
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
 ```
 
-Jika muncul halaman Laragon/XAMPP → **berhasil**
+**Penjelasan Penting**
 
-## 🛠️ Membuat Folder Project
+- `user_id` → penghubung ke tabel users
+- `FOREIGN` KEY → membuat relasi
+- `ON DELETE CASCADE` → hapus otomatis data todo
 
-**Langkah**
+## 🛠️ Cek Relasi di phpMyAdmin
 
-1. Masuk ke folder:
+Langkah
 
-   ```txt
-   laragon/www/
-   ```
+1. Klik tabel `todolists`
+2. Masuk tab **Structure**
+3. Scroll ke bagian **Relation View**
+4. Pastikan:
+   - `user_id` terhubung ke `users.id`
 
-   atau
-
-   ```txt
-   xampp/htdocs/
-   ```
-
-2. Buat folder baru:
-
-   ```txt
-   TodoListApp
-   ```
-
-3. Masuk ke folder tersebut
-
-## 🛠️ Mengakses Project di Browser
-
-**Langkah**
-
-1. Buka browser
-2. Akses:
-   ```txt
-   http://localhost/TodoListApp
-   ```
-
-Jika belum ada file:
-
-- Akan tampil halaman kosong / error directory
-- Ini **normal** pada tahap awal
+Jika terlihat relasi → **berhasil**
