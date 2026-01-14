@@ -1,220 +1,149 @@
-# 🟦 Modul 4 Layout, Bootstrap & Reusable Component
+# 🟦 Modul 5 Sistem Register User
 
 **🎯 Tujuan Modul**
+
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Menggunakan **Bootstrap** untuk membuat UI web
-- Membuat **layout konsisten** di seluruh halaman
-- Menerapkan **reusable component** (header, footer, navbar)
-- Mengatur **navbar active** sesuai halaman aktif
-- Menambahkan **CSS custom**
+- Membuat **form pendaftaran (register)**
+- Mengirim data menggunakan **method POST**
+- Mengamankan password dengan **password hashing**
+- Menyimpan data user ke **database MySQL**
 
-## 🧠 Bootstrap Dasar
+## 🧠 Form HTML
 
-**Apa itu Bootstrap?**
-Bootstrap adalah **framework CSS** yang membantu kita:
+**Apa itu Form?**
+Form digunakan untuk:
 
-- Membuat tampilan cepat & rapi
-- Menghindari styling dari nol
-- Membuat layout responsif
+- Mengambil input dari user
+- Mengirim data ke server
 
-**Komponen Bootstrap yang akan digunakan**
+**Komponen Form Register**
 
-- Container
-- Card
-- Button
-- Navbar
-- Form
-- Alert
+- Input nama
+- Input username
+- Input password
+- Tombol submit
 
-📌 Bootstrap akan dipanggil melalui **CDN**.
+📌 Data akan dikirim menggunakan **POST** agar lebih aman.
 
-## 🧠 Konsep Layout & Reusable Component
+## 🧠 Method POST
 
-**Masalah Jika Tanpa Reusable File**
+**Kenapa POST?**
 
-- Header ditulis berulang
-- Navbar beda-beda
-- Sulit maintenance
+- Data **tidak tampil di URL**
+- Lebih aman untuk password
+- Cocok untuk proses insert data
 
-**Solusi**
-Gunakan:
+**Contoh POST**
 
-- header.php
-- navbar.php
-- footer.php
-
-📌 Prinsip:
-**Satu komponen → digunakan di banyak halaman**
-
-## 🧠 File header.php
-
-**Fungsi**
-
-- Menyimpan:
-  - HTML awal
-  - Bootstrap CSS
-  - CSS custom
-
-**Buat file** `layouts/header.php`
-
-```php
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Todo App</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body>
+```html
+<form method="POST" action="register_process.php"></form>
 ```
 
-## 🧠 File footer.php
+## 🧠 Password Hashing
 
-**Fungsi**
+**Masalah Jika Password Disimpan Polos**
 
-- Menutup HTML
-- Memuat Bootstrap JS
+- Berbahaya
+- Mudah dicuri
+- Tidak aman
 
-**Buat file** `layouts/footer.php`
+Solusi: `password_hash()`
 
-```php
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-```
+- Mengubah password menjadi `hash`
+- Tidak bisa dikembalikan ke bentuk asli
 
-## 🧠 File navbar.php
-
-**Fungsi**
-
-- Navigasi utama aplikasi
-- Digunakan di dashboard & todolist
-
-**Konsep Navbar Active**
-Navbar akan aktif berdasarkan:
+**Contoh**
 
 ```php
-$activePage
+$password = password_hash($\_POST['password'], PASSWORD_DEFAULT);
 ```
 
-**Buat file** `layouts/navbar.php`
+## Insert Data ke Database
+
+**Alur Register**
+
+```txt
+User isi form
+    ↓
+Data dikirim (POST)
+    ↓
+Password di-hash
+    ↓
+Data disimpan ke database
+```
+
+## 🛠️ Membuat `register.php`
+
+**Buat file** `auth/register.php`
 
 ```php
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-$activePage = $activePage ?? '';
+session_start();
+include '../layouts/header.php';
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-    <a class="navbar-brand" href="../dashboard/index.php">Todo App</a>
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow" style="width:360px">
+        <h4 class="text-center mb-3">Register</h4>
 
-    <div class="collapse navbar-collapse">
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-                <a class="nav-link <?= ($activePage === 'dashboard') ? 'active' : ''; ?>"
-                   href="../dashboard/index.php">
-                   Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?= ($activePage === 'todolist') ? 'active' : ''; ?>"
-                   href="../todolist/index.php">
-                   Todo List
-                </a>
-            </li>
-        </ul>
+        <form action="register_process.php" method="POST">
+            <input type="text" name="name" class="form-control mb-2"
+                   placeholder="Nama lengkap" required>
 
-        <span class="navbar-text text-white me-3">
-            Halo, <?= $_SESSION['name'] ?? ''; ?>
-        </span>
+            <input type="text" name="username" class="form-control mb-2"
+                   placeholder="Username" required>
 
-        <a href="../auth/logout.php" class="btn btn-danger btn-sm">
-            Logout
-        </a>
-    </div>
-</nav>
-```
+            <input type="password" name="password" class="form-control mb-3"
+                   placeholder="Password" required>
 
-## 🧠 Konsep include
+            <button class="btn btn-success w-100">Daftar</button>
+        </form>
 
-**Apa itu** `include`?
-`include` digunakan untuk:
-
-- Memanggil file lain
-- Menghindari duplikasi kode
-
-**Contoh Penggunaan**
-
-```php
-include '../layouts/header.php';
-include '../layouts/navbar.php';
-include '../layouts/footer.php';
-```
-
-📌 Jika file tidak ditemukan:
-
-- `include` → warning
-- `require` → fatal error
-
-## 🛠️ Membuat CSS Custom
-
-**Buat file** `assets/css/style.css`
-
-```css
-body {
-  background-color: #f4f6f9;
-}
-
-.card {
-  border-radius: 14px;
-}
-
-.todo-done {
-  text-decoration: line-through;
-  color: gray;
-}
-```
-
-## 🛠️ Menggunakan Layout di Halaman
-
-**Contoh di** `dashboard/index.php`
-
-```php
-<?php
-$activePage = 'dashboard';
-
-include '../layouts/header.php';
-include '../layouts/navbar.php';
-?>
-
-<div class="container mt-4">
-    <div class="card shadow p-4">
-        <h4>Dashboard</h4>
-        <p>Selamat datang!</p>
+        <p class="text-center mt-3 mb-0">
+            Sudah punya akun?
+            <a href="login.php">Login</a>
+        </p>
     </div>
 </div>
 
 <?php include '../layouts/footer.php'; ?>
 ```
 
-## 🛠️ Mengatur Navbar Active
+## 🛠️ Membuat `register_process.php`
+
+**Buat file** `auth/register_process.php`
+
+```php
+<?php
+include '../config/koneksi.php';
+
+$name = $_POST['name'];
+$username = $_POST['username'];
+$password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+mysqli_query($conn, "
+    INSERT INTO users (name, username, password)
+    VALUES ('$name', '$username', '$password')
+");
+
+header("Location: login.php");
+```
+
+## 🛠️ Uji Register
 
 **Langkah**
 
-1. Tentukan halaman aktif:
-   ```php
-   $activePage = 'todolist';
+1. Buka browser
+2. Akses:
+   ```bash
+   http://localhost/TodoListApp/auth/register.php
    ```
-2. Navbar otomatis aktif sesuai halaman
+3. Isi form
+4. Klik **Daftar**
 
-📌 Tidak perlu JavaScript
+**Cek Database**
+
+- Buka phpMyAdmin
+- Tabel `users`
+- Password terlihat **hash**, bukan teks asli
