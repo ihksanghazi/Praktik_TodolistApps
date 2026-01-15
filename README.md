@@ -1,160 +1,150 @@
-# 🟦 Modul 6 Sistem Login & Session
+# 🟦 Modul 7 Auth Guard & Logout
 
 **🎯 Tujuan Modul**
 
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Memahami **konsep autentikasi**
-- Menggunakan **session PHP**
-- Membuat proses **login berhasil & gagal**
-- Menampilkan **flash message error**
-- Melakukan **redirect** setelah login
+- Memahami konsep **proteksi halaman (auth guard)**
+- Membuat **middleware autentikasi sederhana**
+- Melindungi halaman penting dari akses ilegal
+- Membuat fitur **logout**
+- Menghapus session dengan benar
 
-## 🧠 Konsep Autentikasi & Session
+## 🧠 Kenapa Halaman Perlu Diproteksi?
 
-**Apa itu Login?**
-Login adalah proses:
+**Masalah Tanpa Auth Guard**
 
-- Memverifikasi identitas user
-- Menyimpan status login
+Jika tidak ada proteksi:
 
-**Apa itu Session?**
-Session adalah **penyimpanan data sementara di server** selama user aktif.
+- User belum login bisa membuka dashboard
+- User bisa langsung akses `/todolist/index.php`
+- Data tidak aman
 
-📌 Session digunakan untuk:
+📌 Solusi:
+**Auth middleware / auth guard**
 
-- Menyimpan status login
-- Menyimpan data user (id, nama)
+## 🧠 Konsep Auth Middleware Sederhana
 
-## 🧠 Alur Login Aplikasi
+**Apa itu Auth Middleware?**
+Auth middleware adalah **kode pengecek login** yang:
+
+- Dijalanakan sebelum halaman ditampilkan
+- Mengecek apakah user sudah login
+
+**Prinsip Kerja**
 
 ```txt
-User isi username & password
-        ↓
-Server cek ke database
-        ↓
-Jika benar → session dibuat
-        ↓
-Redirect ke dashboard
-Jika salah → error message
+Cek session login
+    ↓
+Jika belum login → redirect ke login
+Jika sudah login → lanjut halaman
 ```
 
-## 🧠 Validasi User & Password
+## 🧠 File `auth_check.php`
 
-**Cek Username**
+**Fungsi**
 
-```sql
-SELECT * FROM users WHERE username = ?
-```
+- Mengecek status login
+- Digunakan di semua halaman yang dilindungi
 
-**Cek Password**
-Gunakan:
-
-```php
-password_verify($password, $hash)
-```
-
-📌 Password **tidak dibandingkan langsung**.
-
-## 🧠 Flash Message Error
-
-**Apa itu Flash Message?**
-
-- Pesan sementara
-- Disimpan di session
-- Hilang setelah ditampilkan
-
-📌 Digunakan untuk:
-
-- Login gagal
-- Error validasi
-
-## 🛠️ Membuat `login.php`
-
-**Buat file** `auth/login.php`
+**Buat file** `auth/auth_check.php`
 
 ```php
 <?php
 session_start();
-include '../layouts/header.php';
-?>
 
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4 shadow" style="width:360px">
-        <h4 class="text-center mb-3">Login</h4>
-
-        <!-- FLASH MESSAGE -->
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger alert-dismissible fade show">
-                <?= $_SESSION['error']; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php unset($_SESSION['error']); endif; ?>
-
-        <form action="login_process.php" method="POST">
-            <input type="text" name="username"
-                   class="form-control mb-2"
-                   placeholder="Username" required>
-
-            <input type="password" name="password"
-                   class="form-control mb-3"
-                   placeholder="Password" required>
-
-            <button class="btn btn-primary w-100">Login</button>
-        </form>
-
-        <p class="text-center mt-3 mb-0">
-            Belum punya akun?
-            <a href="register.php">Register</a>
-        </p>
-    </div>
-</div>
-
-<?php include '../layouts/footer.php'; ?>
-```
-
-## 🛠️ Membuat `login_process.php`
-
-**Buat file** `auth/login_process.php`
-
-```php
-<?php
-session_start();
-include '../config/koneksi.php';
-
-$username = $_POST['username'];
-$password = $_POST['password'];
-
-$user = mysqli_fetch_assoc(
-    mysqli_query($conn, "SELECT * FROM users WHERE username='$username'")
-);
-
-if ($user && password_verify($password, $user['password'])) {
-
-    $_SESSION['login'] = true;
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['name'] = $user['name'];
-
-    header("Location: ../dashboard/index.php");
-    exit;
-
-} else {
-    $_SESSION['error'] = "Username atau password salah!";
-    header("Location: login.php");
+if (!isset($_SESSION['login'])) {
+    header("Location: ../auth/login.php");
     exit;
 }
 ```
 
-## 🛠️ Uji Login Berhasil & Gagal
+📌 Penjelasan:
 
-**Login Berhasil**
+- `session_start()` → mengaktifkan session
+- `$_SESSION['login']` → penanda user sudah login
+- `header()` → redirect jika belum login
 
-- Username & password benar
-- Redirect ke dashboard
-- Session aktif
+## 🧠 Proteksi Halaman
 
-**Login Gagal**
+**Halaman yang Wajib Diproteksi**
 
-- Username / password salah
-- Tetap di halaman login
-- Muncul alert error
+- Dashboard
+- Todo List
+- Semua halaman setelah login
+
+## 🛠️ Proteksi Dashboard
+
+**Edit** `dashboard/index.php`
+
+```php
+<?php
+$activePage = 'dashboard';
+
+include '../auth/auth_check.php';
+include '../layouts/header.php';
+include '../layouts/navbar.php';
+?>
+```
+
+📌 `auth_check.php` harus dipanggil **sebelum HTML**.
+
+## 🛠️ Proteksi Todo List
+
+**Edit** `todolist/index.php`
+
+```php
+<?php
+$activePage = 'todolist';
+
+include '../auth/auth_check.php';
+include '../config/koneksi.php';
+include '../layouts/header.php';
+include '../layouts/navbar.php';
+?>
+```
+
+## 🧠 Logout User
+
+**Apa itu Logout?**
+Logout adalah proses:
+
+- Menghapus session
+- Mengakhiri login
+- Mengembalikan user ke halaman login
+
+## 🛠️ Membuat `logout.php`
+
+**Buat file** `auth/logout.php`
+
+```php
+<?php
+session_start();
+session_destroy();
+header("Location: login.php");
+exit;
+```
+
+📌 Penjelasan:
+
+- `session_destroy()` → hapus semua session
+- Redirect ke halaman login
+
+## 🛠️ Uji Auth Guard & Logout
+
+**Uji Auth Guard**
+
+1. Logout dari aplikasi
+2. Akses langsung:
+   ```bash
+   http://localhost/TodoListApp/dashboard/index.php
+   ```
+
+✅ Harus diarahkan ke halaman login
+
+**Uji Logout**
+
+1. Login
+2. Klik tombol **Logout**
+3. Session hilang
+4. Kembali ke halaman login
