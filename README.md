@@ -1,81 +1,53 @@
-# 🟦 Modul 7 Auth Guard & Logout
+# 🟦 Modul 8 Dashboard User
 
 **🎯 Tujuan Modul**
 
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Memahami konsep **proteksi halaman (auth guard)**
-- Membuat **middleware autentikasi sederhana**
-- Melindungi halaman penting dari akses ilegal
-- Membuat fitur **logout**
-- Menghapus session dengan benar
+- Membuat **halaman dashboard**
+- Menampilkan **data user dari session**
+- Menyediakan **navigasi utama aplikasi**
+- Menerapkan **UX sederhana namun jelas**
 
-## 🧠 Kenapa Halaman Perlu Diproteksi?
+## 🧠 Fungsi Dashboard
 
-**Masalah Tanpa Auth Guard**
+**Apa itu Dashboard?**
+Dashboard adalah:
 
-Jika tidak ada proteksi:
+- Halaman pertama setelah login
+- Pusat navigasi aplikasi
+- Tempat menampilkan informasi user
 
-- User belum login bisa membuka dashboard
-- User bisa langsung akses `/todolist/index.php`
-- Data tidak aman
+📌 Dalam aplikasi TodoList, dashboard berfungsi sebagai:
+“Halaman sambutan + pintu menuju fitur utama”
 
-📌 Solusi:
-**Auth middleware / auth guard**
+## 🧠 Menampilkan Data dari Session
 
-## 🧠 Konsep Auth Middleware Sederhana
+**Data Session yang Digunakan**
 
-**Apa itu Auth Middleware?**
-Auth middleware adalah **kode pengecek login** yang:
-
-- Dijalanakan sebelum halaman ditampilkan
-- Mengecek apakah user sudah login
-
-**Prinsip Kerja**
-
-```txt
-Cek session login
-    ↓
-Jika belum login → redirect ke login
-Jika sudah login → lanjut halaman
-```
-
-## 🧠 File `auth_check.php`
-
-**Fungsi**
-
-- Mengecek status login
-- Digunakan di semua halaman yang dilindungi
-
-**Buat file** `auth/auth_check.php`
+Saat login [Modul 6](https://github.com/ihksanghazi/Praktik_TodolistApps/tree/Modul_6?tab=readme-ov-file#%EF%B8%8F-membuat-login_processphp), kita menyimpan:
 
 ```php
-<?php
-session_start();
-
-if (!isset($_SESSION['login'])) {
-    header("Location: ../auth/login.php");
-    exit;
-}
+$_SESSION['name']
+$_SESSION['user_id']
 ```
 
-📌 Penjelasan:
+📌 Data ini bisa dipanggil di halaman mana pun selama user login.
 
-- `session_start()` → mengaktifkan session
-- `$_SESSION['login']` → penanda user sudah login
-- `header()` → redirect jika belum login
+## 🧠 UX Sederhana pada Dashboard
 
-## 🧠 Proteksi Halaman
+**Prinsip UX yang Digunakan**
 
-**Halaman yang Wajib Diproteksi**
+- Tampilan bersih
+- Informasi jelas
+- Tombol aksi utama terlihat
 
-- Dashboard
-- Todo List
-- Semua halaman setelah login
+📌 Fokus:
+Jangan terlalu ramai, cukup informatif
 
-## 🛠️ Proteksi Dashboard
+## 🛠️ Membuat dashboard/index.php
 
-**Edit** `dashboard/index.php`
+**Buat file** `dashboard/index.php`
 
 ```php
 <?php
@@ -85,66 +57,38 @@ include '../auth/auth_check.php';
 include '../layouts/header.php';
 include '../layouts/navbar.php';
 ?>
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h4 class="mb-2">Dashboard</h4>
+
+        <p class="text-muted">
+            Selamat datang kembali,
+            <strong><?= $_SESSION['name']; ?></strong> 👋
+        </p>
+
+        <hr>
+
+        <p>
+            Dari halaman ini, kamu bisa mengelola daftar tugas harianmu.
+        </p>
+
+        <a href="../todolist/index.php" class="btn btn-primary">
+            Kelola Todo List
+        </a>
+    </div>
+</div>
+
+<?php include '../layouts/footer.php'; ?>
 ```
 
-📌 `auth_check.php` harus dipanggil **sebelum HTML**.
+## 🛠️ Uji Dashboard
 
-## 🛠️ Proteksi Todo List
+**Langkah**
 
-**Edit** `todolist/index.php`
-
-```php
-<?php
-$activePage = 'todolist';
-
-include '../auth/auth_check.php';
-include '../config/koneksi.php';
-include '../layouts/header.php';
-include '../layouts/navbar.php';
-?>
-```
-
-## 🧠 Logout User
-
-**Apa itu Logout?**
-Logout adalah proses:
-
-- Menghapus session
-- Mengakhiri login
-- Mengembalikan user ke halaman login
-
-## 🛠️ Membuat `logout.php`
-
-**Buat file** `auth/logout.php`
-
-```php
-<?php
-session_start();
-session_destroy();
-header("Location: login.php");
-exit;
-```
-
-📌 Penjelasan:
-
-- `session_destroy()` → hapus semua session
-- Redirect ke halaman login
-
-## 🛠️ Uji Auth Guard & Logout
-
-**Uji Auth Guard**
-
-1. Logout dari aplikasi
-2. Akses langsung:
-   ```bash
-   http://localhost/TodoListApp/dashboard/index.php
-   ```
-
-✅ Harus diarahkan ke halaman login
-
-**Uji Logout**
-
-1. Login
-2. Klik tombol **Logout**
-3. Session hilang
-4. Kembali ke halaman login
+1. Login ke aplikasi
+2. Setelah login → otomatis ke dashboard
+3. Pastikan:
+   - Nama user tampil
+   - Navbar aktif di **Dashboard**
+   - Tombol menuju TodoList berfungsi
