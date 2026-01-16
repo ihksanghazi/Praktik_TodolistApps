@@ -1,4 +1,4 @@
-# 🟦 Modul 2 — Database & Relasi One-to-Many
+# 🟦 Modul 2 Database & Relasi One-to-Many
 
 **🎯 Tujuan Modul**
 
