@@ -1,4 +1,4 @@
-# 🟦 Modul 9 — Create & Read Todo List
+# 🟦 Modul 9 Create & Read Todo List
 
 **🎯 Tujuan Modul**
 
