@@ -1,4 +1,4 @@
-# 🟦 Modul 1 — Pengenalan Project & Setup Lingkungan
+# 🟦 Modul 1 Pengenalan Project & Setup Lingkungan
 
 **🎯 Tujuan Modul**
 
