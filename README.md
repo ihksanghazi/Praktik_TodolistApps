@@ -120,7 +120,7 @@ $todos = mysqli_query($conn, "
             </ul>
         <?php else: ?>
             <div class="alert alert-info">
-                Belum ada todo. Yuk tambahkan todo pertamamu! 🚀
+                Belum ada todo.
             </div>
         <?php endif; ?>
     </div>
