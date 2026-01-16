@@ -1,165 +1,139 @@
-# 🟦 Modul 9 — Create & Read Todo List
+# 🟦 Modul 10 Update Status Todo (Done)
 
 **🎯 Tujuan Modul**
 
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Menampilkan **todo milik user yang sedang login**
-- Menambahkan **todo baru ke database**
-- Memahami **relasi user ↔ todo (One-to-Many)**
-- Menggunakan **session untuk filter data**
+- Mengubah status todo menjadi **selesai**
+- Memahami **query UPDATE**
+- Menggunakan **parameter** `id`
+- Memberikan **feedback visual** pada todo yang selesai
 
-## 🧠 Relasi User & Todo (Implementasi Nyata)
+## 🧠 Konsep UPDATE pada Database
 
-**Konsep Penting**
+**Apa itu UPDATE?**
+UPDATE digunakan untuk:
 
-- Setiap user hanya boleh melihat todo miliknya sendiri
-- Todo tidak boleh tercampur dengan user lain
+- Mengubah data yang sudah ada
+- Bukan menambah data baru
 
-**Implementasi Teknis**
-Relasi ini dijalankan menggunakan:
-
-```php
-$_SESSION['user_id']
-```
-
-📌 Artinya:
-
-- Saat user login → `user_id` disimpan di session
-- Saat ambil todo → query difilter berdasarkan `user_id`
-
-## 🧠 Query SELECT Berdasarkan User
-
-**Masalah Jika Tanpa Filter**
-
-```sql
-SELECT * FROM todolists;
-```
-
-❌ Semua user melihat semua todo
-
-**Solusi (WAJIB)**
-
-```sql
-SELECT * FROM todolists WHERE user_id = ?
-```
-
-## 🧠 Form Tambah Todo
-
-**Fungsi Form**
-
-- Mengambil input todo dari user
-- Mengirim data menggunakan **POST**
-- Diproses oleh `store.php`
-
-**Field Minimal**
-
-- `title` (isi todo)
-
-## 🧠 INSERT Data Todo
-
-**Alur CREATE Todo**
+**Contoh Kasus**
+Mengubah status todo:
 
 ```txt
-User isi form
-     ↓
-Data dikirim (POST)
-     ↓
-Ambil user_id dari session
-     ↓
-INSERT ke database
-     ↓
-Redirect ke halaman todo
+Belum selesai → Selesai
 ```
 
-## 🛠️ Menampilkan Todo (READ)
+## 🧠 Status is_done
 
-**Buat file** `todolist/index.php`
+**Fungsi Kolom** `is_done`
+| Nilai | Arti |
+| ----- | ------------- |
+| 0 | Belum selesai |
+| 1 | Selesai |
+
+📌 Status ini yang akan kita ubah menggunakan UPDATE.
+
+## 🧠 Parameter id
+
+**Kenapa Pakai** `id`?
+
+- Setiap todo punya `id` unik
+- UPDATE harus tepat sasaran
+
+Contoh:
 
 ```php
-<?php
-$activePage = 'todolist';
+?id=5
+```
 
-include '../auth/auth_check.php';
-include '../config/koneksi.php';
-include '../layouts/header.php';
-include '../layouts/navbar.php';
+📌 Artinya: ubah todo dengan `id = 5`.
 
-$user_id = $_SESSION['user_id'];
+## 🧠 UX: Feedback Visual
 
-$todos = mysqli_query($conn, "
-    SELECT * FROM todolists
-    WHERE user_id = $user_id
-    ORDER BY id DESC
-");
-?>
+**Kenapa Perlu Feedback Visual?**
+User perlu tahu:
 
-<div class="container mt-4">
-    <div class="card shadow p-4">
-        <h4 class="mb-3">Todo List</h4>
+- Todo sudah selesai
+- Tidak perlu ditebak
 
-        <!-- FORM TAMBAH TODO -->
-        <form action="store.php" method="POST" class="d-flex mb-4">
-            <input
-                type="text"
-                name="title"
-                class="form-control me-2"
-                placeholder="Tulis todo baru..."
-                required>
-            <button class="btn btn-success">Tambah</button>
-        </form>
+**Solusi**
 
-        <!-- LIST TODO -->
-        <?php if (mysqli_num_rows($todos) > 0): ?>
-            <ul class="list-group">
-                <?php while ($todo = mysqli_fetch_assoc($todos)): ?>
-                    <li class="list-group-item">
-                        <?= htmlspecialchars($todo['title']); ?>
-                    </li>
-                <?php endwhile; ?>
-            </ul>
-        <?php else: ?>
-            <div class="alert alert-info">
-                Belum ada todo. Yuk tambahkan todo pertamamu! 🚀
-            </div>
-        <?php endif; ?>
-    </div>
+- Todo dicoret
+- Warna abu-abu
+
+## Tombol “Tandai Selesai”
+
+**Edit** `todolist/index.php`
+
+```php
+<?= htmlspecialchars($todo['title']); ?>
+// letakkan kodenya dibawah htmlspecialchars
+<div>
+    <?php if (!$todo['is_done']): ?>
+        <a
+            href="done.php?id=<?= $todo['id']; ?>"
+            class="btn btn-sm btn-warning"
+            title="Tandai selesai">
+            ✔
+        </a>
+    <?php endif; ?>
 </div>
-
-<?php include '../layouts/footer.php'; ?>
 ```
 
-## 🛠️ Menambah Todo (CREATE)
+📌 Tombol ini akan mengirim `id` todo ke `done.php`.
 
-**Buat file** `todolist/store.php`
+## 🛠️ Membuat done.php
+
+**Buat file** `todolist/done.php`
 
 ```php
 <?php
-session_start();
 include '../config/koneksi.php';
 
-$title = $_POST['title'];
-$user_id = $_SESSION['user_id'];
+$id = $_GET['id'];
 
 mysqli_query($conn, "
-    INSERT INTO todolists (user_id, title)
-    VALUES ($user_id, '$title')
+    UPDATE todolists
+    SET is_done = 1
+    WHERE id = $id
 ");
 
 header("Location: index.php");
 exit;
 ```
 
-## 🛠️ Uji Fitur Create & Read
+## 🛠️ Styling Todo Selesai
 
-**Langkah Pengujian**
+**Tambahkan kode ini di** `assets/css/style.css`
 
-1. Login sebagai user A
-2. Tambahkan beberapa todo
-3. Logout
-4. Login sebagai user B
-5. Pastikan:
-   - Todo user A **tidak muncul**
-   - User B punya todo sendiri
+```css
+.todo-done {
+  text-decoration: line-through;
+  color: gray;
+}
+```
 
-✅ Jika berhasil → relasi berjalan benar
+## 🛠️ Terapkan Styling di List Todo
+
+**Edit bagian list di** `todolist/index.php`
+
+Bungkus `htmlspecialchars` dengan tag `span` beserta attributnya:
+
+```php
+<span class="<?= $todo['is_done'] ? 'todo-done' : ''; ?>">
+    <?= htmlspecialchars($todo['title']); ?>
+</span>
+```
+
+📌 Jika `is_done = 1`, class `todo-done` akan aktif.
+
+## 🛠️ Uji Update Status Todo
+
+**Langkah**
+
+1. Tambahkan beberapa todo
+2. Klik tombol ✔
+3. Pastikan:
+   - Todo dicoret
+   - Data di database berubah (`is_done = 1`)
