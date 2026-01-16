@@ -178,11 +178,6 @@ body {
 .card {
   border-radius: 14px;
 }
-
-.todo-done {
-  text-decoration: line-through;
-  color: gray;
-}
 ```
 
 ## 🛠️ Menggunakan Layout di Halaman
