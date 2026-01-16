@@ -1,91 +1,48 @@
-# 🟦 Modul 10 Update Status Todo (Done)
+# 🟦 Modul 11 Delete Todo & Finalisasi Aplikasi
 
 **🎯 Tujuan Modul**
 
 Setelah menyelesaikan modul ini, siswa mampu:
 
-- Mengubah status todo menjadi **selesai**
-- Memahami **query UPDATE**
-- Menggunakan **parameter** `id`
-- Memberikan **feedback visual** pada todo yang selesai
+- Menghapus data todo dengan benar
+- Memahami **risiko operasi DELETE**
+- Menggunakan **konfirmasi sebelum hapus**
+- Melakukan **testing end-to-end**
+- Menyelesaikan aplikasi TodoList Web secara utuh 🎉
 
-## 🧠 Konsep UPDATE pada Database
+## 🧠 Konsep DELETE pada Database
 
-**Apa itu UPDATE?**
-UPDATE digunakan untuk:
+**Apa itu DELETE?**
+DELETE digunakan untuk:
 
-- Mengubah data yang sudah ada
-- Bukan menambah data baru
+- Menghapus data secara **permanen**
+- Data **tidak bisa dikembalikan**
 
-**Contoh Kasus**
-Mengubah status todo:
+**Contoh**
 
-```txt
-Belum selesai → Selesai
+```sql
+DELETE FROM todolists WHERE id = 10;
 ```
 
-## 🧠 Status is_done
+📌 **Peringatan Penting**
+DELETE tanpa `WHERE` bisa menghapus **SEMUA DATA**.
 
-**Fungsi Kolom** `is_done`
-| Nilai | Arti |
-| ----- | ------------- |
-| 0 | Belum selesai |
-| 1 | Selesai |
+## 🧠 Risiko DELETE & Solusinya
 
-📌 Status ini yang akan kita ubah menggunakan UPDATE.
+**Risiko**
 
-## 🧠 Parameter id
+- Salah klik
+- Data penting terhapus
+- Tidak ada undo
 
-**Kenapa Pakai** `id`?
+**Solusi UX**
 
-- Setiap todo punya `id` unik
-- UPDATE harus tepat sasaran
+- Konfirmasi sebelum hapus
+- Pesan peringatan jelas
 
-Contoh:
+## 🛠️ Membuat `delete.php`
 
-```php
-?id=5
-```
-
-📌 Artinya: ubah todo dengan `id = 5`.
-
-## 🧠 UX: Feedback Visual
-
-**Kenapa Perlu Feedback Visual?**
-User perlu tahu:
-
-- Todo sudah selesai
-- Tidak perlu ditebak
-
-**Solusi**
-
-- Todo dicoret
-- Warna abu-abu
-
-## Tombol “Tandai Selesai”
-
-**Edit** `todolist/index.php`
-
-```php
-<?= htmlspecialchars($todo['title']); ?>
-// letakkan kodenya dibawah htmlspecialchars
-<div>
-    <?php if (!$todo['is_done']): ?>
-        <a
-            href="done.php?id=<?= $todo['id']; ?>"
-            class="btn btn-sm btn-warning"
-            title="Tandai selesai">
-            ✔
-        </a>
-    <?php endif; ?>
-</div>
-```
-
-📌 Tombol ini akan mengirim `id` todo ke `done.php`.
-
-## 🛠️ Membuat done.php
-
-**Buat file** `todolist/done.php`
+**Buat file** `todolist/delete.php`
 
 ```php
 <?php
@@ -94,8 +51,7 @@ include '../config/koneksi.php';
 $id = $_GET['id'];
 
 mysqli_query($conn, "
-    UPDATE todolists
-    SET is_done = 1
+    DELETE FROM todolists
     WHERE id = $id
 ");
 
@@ -103,37 +59,41 @@ header("Location: index.php");
 exit;
 ```
 
-## 🛠️ Styling Todo Selesai
+📌 `id` memastikan hanya **1 todo** yang terhapus.
 
-**Tambahkan kode ini di** `assets/css/style.css`
+## 🛠️ Konfirmasi Hapus (JavaScript)
 
-```css
-.todo-done {
-  text-decoration: line-through;
-  color: gray;
-}
-```
-
-## 🛠️ Terapkan Styling di List Todo
-
-**Edit bagian list di** `todolist/index.php`
-
-Bungkus `htmlspecialchars` dengan tag `span` beserta attributnya:
+**Edit** `todolist/index.php`
+Tambahkan tombol hapus:
 
 ```php
-<span class="<?= $todo['is_done'] ? 'todo-done' : ''; ?>">
-    <?= htmlspecialchars($todo['title']); ?>
-</span>
+<?php if (!$todo['is_done']): ?>
+    <a
+        href="done.php?id=<?= $todo['id']; ?>"
+        class="btn btn-sm btn-warning"
+        title="Tandai selesai">
+        ✔
+    </a>
+<?php endif; ?>
+
+// letakkan kode dibawah ini
+
+<a href="delete.php?id=<?= $todo['id']; ?>"
+   class="btn btn-sm btn-danger"
+   onclick="return confirm('Hapus todo ini?')"
+   title="Hapus">
+   ✖
+</a>
 ```
 
-📌 Jika `is_done = 1`, class `todo-done` akan aktif.
+📌 Jika user klik **Cancel**, proses DELETE dibatalkan.
 
-## 🛠️ Uji Update Status Todo
+## 🛠️ Uji Fitur Delete
 
 **Langkah**
 
 1. Tambahkan beberapa todo
-2. Klik tombol ✔
-3. Pastikan:
-   - Todo dicoret
-   - Data di database berubah (`is_done = 1`)
+2. Klik tombol hapus
+3. Pilih:
+   - **Cancel** → todo tetap ada
+   - **OK** → todo terhapus
